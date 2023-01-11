@@ -3,9 +3,10 @@
 A weekly "newsletter" introducing [MuJoCo](https://github.com/deepmind/mujoco) users to new features, tips, and tricks.
 
 - [MuJoCo Weekly: Tips and Tricks for MuJoCo Users, Every Week](#mujoco-weekly-tips-and-tricks-for-mujoco-users-every-week)
-  - [Week 1](#week-1)
+  - [Week 1: Gravity Compensation](#week-1-gravity-compensation)
+  - [Week 2: Ghostifying an Object](#week-2-ghostifying-an-object)
 
-## Week 1
+## Week 1: Gravity Compensation
 
 Here are two ways to implement gravity compensation in MuJoCo:
 
@@ -25,3 +26,26 @@ def compensate_gravity(model: mjcf.RootElement) -> None:
     for body in model.find_all("body"):
         body.gravcomp = 1.0
 ```
+
+## Week 2: Ghostifying an Object
+
+<p float="left">
+  <img src="assets/cube.png" height="400">
+</p>
+
+To disable contacts with a body in a scene, iterate through all its geoms and set their contype and conaffinity to 0.
+
+```python
+for geom in prop.find_all("geom"):
+    geom.contype = 0
+    geom.conaffinity = 0
+```
+
+There are many use cases for disabling contacts (one being speeding up the physics pipeline), but let's talk about one particular useful instance: "ghostifying" an object for use as a visual hint. For example, in manipulation, you might want to [visually render an object's goal pose](https://youtu.be/Bdx7DuAMB6o?t=135). The MuJoCo way to achieve this is to:
+
+1. Duplicate the object of interest
+2. Iterate through all its geoms and set their contype and conaffinity to 0
+3. Iterate through all its bodies and set their mocap attribute to True
+4. Optional: make each geom transparent
+
+Note that `mocap=True` effectively disables the object's dynamics (it is treated as fixed by the simulator).
